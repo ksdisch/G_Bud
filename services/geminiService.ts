@@ -2,13 +2,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { RawEmail, ProcessedData, AppMode } from '../types';
 
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-  throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+// FIX: Initialize the GoogleGenAI client using `process.env.API_KEY` as per the coding guidelines.
+// This resolves the TypeScript error regarding `import.meta.env` and ensures the correct API key handling method.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const generalResponseSchema = {
   type: Type.OBJECT,

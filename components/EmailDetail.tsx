@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import type { ProcessedEmail, AppMode } from '../types';
-import { CalendarIcon, CheckCircleIcon, LightBulbIcon, TagIcon, ExclamationTriangleIcon, DocumentTextIcon, StarIcon, ClipboardDocumentIcon } from './Icons';
+import { CalendarIcon, CheckCircleIcon, LightBulbIcon, TagIcon, ExclamationTriangleIcon, DocumentTextIcon, StarIcon, ClipboardDocumentIcon, ClipboardCheckIcon } from './Icons';
 
 interface EmailDetailProps {
   email: ProcessedEmail | null;
@@ -24,7 +23,7 @@ const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.
     </div>
 )
 
-const GeneralContent: React.FC<{ email: ProcessedEmail }> = ({ email }) => {
+const GeneralContent: React.FC<{ email: ProcessedEmail; showToast: (message: string) => void }> = ({ email, showToast }) => {
     const { processed } = email;
     return (
         <div className="space-y-4">
@@ -38,7 +37,7 @@ const GeneralContent: React.FC<{ email: ProcessedEmail }> = ({ email }) => {
                         <p><strong>Title:</strong> {processed.event.title}</p>
                         <p><strong>Date:</strong> {processed.event.date}</p>
                         <p><strong>Time:</strong> {processed.event.time}</p>
-                        <button className="mt-2 w-full text-sm bg-green-600 text-white py-1.5 px-3 rounded-md hover:bg-green-700">Add to Calendar</button>
+                        <button onClick={() => showToast(`Event "${processed.event?.title}" added to calendar!`)} className="mt-2 w-full text-sm bg-green-600 text-white py-1.5 px-3 rounded-md hover:bg-green-700 transition-colors">Add to Calendar</button>
                     </Section>
                 )}
                 {processed.tasks.length > 0 && (
@@ -54,7 +53,7 @@ const GeneralContent: React.FC<{ email: ProcessedEmail }> = ({ email }) => {
                 <Section title="Suggested Actions" icon={<LightBulbIcon className="w-5 h-5"/>} colorClass="text-yellow-800 dark:text-yellow-300">
                     <div className="flex flex-wrap gap-2">
                     {processed.suggestedActions.map((action, index) => (
-                        <button key={index} className="text-sm bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200 py-1 px-3 rounded-full hover:bg-yellow-300 dark:hover:bg-yellow-700">{action}</button>
+                        <button key={index} onClick={() => showToast(`Action: "${action}" triggered.`)} className="text-sm bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200 py-1 px-3 rounded-full hover:bg-yellow-300 dark:hover:bg-yellow-700 transition-colors">{action}</button>
                     ))}
                     </div>
                 </Section>
@@ -63,11 +62,20 @@ const GeneralContent: React.FC<{ email: ProcessedEmail }> = ({ email }) => {
     );
 }
 
-const JobSearchContent: React.FC<{ email: ProcessedEmail }> = ({ email }) => {
+const JobSearchContent: React.FC<{ 
+    email: ProcessedEmail; 
+    showToast: (message: string) => void;
+    copiedItem: string | null;
+    setCopiedItem: (item: string | null) => void;
+}> = ({ email, showToast, copiedItem, setCopiedItem }) => {
     const { processed } = email;
 
-    const copyToClipboard = (text: string) => {
+    const handleCopyToClipboard = (text: string, type: string) => {
+        if (!text) return;
         navigator.clipboard.writeText(text);
+        showToast(`${type} copied to clipboard!`);
+        setCopiedItem(type);
+        setTimeout(() => setCopiedItem(null), 2000);
     }
     
     return (
@@ -78,18 +86,29 @@ const JobSearchContent: React.FC<{ email: ProcessedEmail }> = ({ email }) => {
 
             {(processed.tailoredResumePoints && processed.tailoredResumePoints.length > 0) && (
                 <Section title="Resume Suggestions" icon={<StarIcon className="w-5 h-5"/>} colorClass="text-green-800 dark:text-green-300">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">The AI suggests emphasizing these points on your resume for this role:</p>
-                    <ul className="list-disc list-inside space-y-1">
-                        {processed.tailoredResumePoints.map((point, index) => <li key={index}>{point}</li>)}
-                    </ul>
+                    <div className="flex justify-between items-start">
+                        <div>
+                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">The AI suggests emphasizing these points on your resume for this role:</p>
+                            <ul className="list-disc list-inside space-y-1">
+                                {processed.tailoredResumePoints.map((point, index) => <li key={index}>{point}</li>)}
+                            </ul>
+                        </div>
+                        <button 
+                            onClick={() => handleCopyToClipboard(processed.tailoredResumePoints?.join('\n') || '', 'Resume points')} 
+                            className="flex items-center gap-1.5 text-sm bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 py-1 px-3 rounded-full hover:bg-green-200 dark:hover:bg-green-800/50 transition-colors flex-shrink-0 ml-4"
+                        >
+                           {copiedItem === 'Resume points' ? <ClipboardCheckIcon className="w-4 h-4" /> : <ClipboardDocumentIcon className="w-4 h-4" />}
+                            Copy
+                        </button>
+                    </div>
                 </Section>
             )}
 
             {processed.coverLetterDraft && (
                  <Section title="Cover Letter Draft" icon={<DocumentTextIcon className="w-5 h-5"/>} colorClass="text-blue-800 dark:text-blue-300">
                     <div className="relative">
-                        <button onClick={() => copyToClipboard(processed.coverLetterDraft || '')} className="absolute top-0 right-0 p-1 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200" title="Copy to clipboard">
-                            <ClipboardDocumentIcon className="w-4 h-4"/>
+                        <button onClick={() => handleCopyToClipboard(processed.coverLetterDraft || '', 'Cover letter')} className="absolute top-2 right-2 p-1.5 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 bg-gray-200 dark:bg-gray-900 rounded-full" title="Copy to clipboard">
+                            {copiedItem === 'Cover letter' ? <ClipboardCheckIcon className="w-4 h-4 text-green-500" /> : <ClipboardDocumentIcon className="w-4 h-4" />}
                         </button>
                         <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap bg-gray-100 dark:bg-gray-800 p-3 rounded-md">{processed.coverLetterDraft}</p>
                     </div>
@@ -102,16 +121,46 @@ const JobSearchContent: React.FC<{ email: ProcessedEmail }> = ({ email }) => {
                     <p><strong>Date:</strong> {processed.interviewDetails.date}</p>
                     <p><strong>Time:</strong> {processed.interviewDetails.time}</p>
                     {processed.interviewDetails.platform && <p><strong>Platform:</strong> {processed.interviewDetails.platform}</p>}
-                    <button className="mt-2 w-full text-sm bg-purple-600 text-white py-1.5 px-3 rounded-md hover:bg-purple-700">Add to Calendar</button>
+                    <button onClick={() => showToast(`Interview "${processed.interviewDetails?.title}" added to calendar!`)} className="mt-2 w-full text-sm bg-purple-600 text-white py-1.5 px-3 rounded-md hover:bg-purple-700 transition-colors">Add to Calendar</button>
                 </Section>
             )}
         </div>
     )
 }
 
+const Toast: React.FC<{ message: string; isVisible: boolean }> = ({ message, isVisible }) => {
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-gray-200 text-white dark:text-gray-900 px-5 py-2.5 rounded-full shadow-lg text-sm font-semibold animate-fade-in-out z-50">
+      {message}
+      <style>{`
+        @keyframes fade-in-out {
+          0% { opacity: 0; transform: translateY(20px) translateX(-50%); }
+          10% { opacity: 1; transform: translateY(0) translateX(-50%); }
+          90% { opacity: 1; transform: translateY(0) translateX(-50%); }
+          100% { opacity: 0; transform: translateY(20px) translateX(-50%); }
+        }
+        .animate-fade-in-out {
+          animation: fade-in-out 3s ease-in-out forwards;
+        }
+      `}</style>
+    </div>
+  );
+};
+
 
 const EmailDetail: React.FC<EmailDetailProps> = ({ email, mode }) => {
   const [activeTab, setActiveTab] = useState('ai-summary');
+  const [toast, setToast] = useState({ message: '', isVisible: false });
+  const [copiedItem, setCopiedItem] = useState<string | null>(null);
+
+  const showToast = (message: string) => {
+    setToast({ message, isVisible: true });
+    setTimeout(() => {
+      setToast({ message: '', isVisible: false });
+    }, 3000);
+  };
 
   useEffect(() => {
     setActiveTab('ai-summary');
@@ -148,7 +197,7 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email, mode }) => {
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md h-full overflow-y-auto flex flex-col">
+    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md h-full overflow-y-auto flex flex-col relative">
       <header className="p-6 flex-shrink-0">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{email.subject}</h1>
         <div className="flex items-center justify-between mt-2">
@@ -188,12 +237,15 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email, mode }) => {
 
       <div className="p-6 flex-grow">
         {activeTab === 'ai-summary' && (
-            mode === 'general' ? <GeneralContent email={email}/> : <JobSearchContent email={email}/>
+            mode === 'general' 
+                ? <GeneralContent email={email} showToast={showToast} /> 
+                : <JobSearchContent email={email} showToast={showToast} copiedItem={copiedItem} setCopiedItem={setCopiedItem} />
         )}
         {activeTab === 'original' && (
              <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{email.body}</p>
         )}
       </div>
+      <Toast message={toast.message} isVisible={toast.isVisible} />
     </div>
   );
 };
