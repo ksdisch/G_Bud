@@ -1,0 +1,5 @@
+{
+  "name": "AI Email Assistant",
+  "description": "An intelligent email assistant that categorizes, summarizes, prioritizes, and extracts tasks and events from your emails using the Gemini API. It helps you manage your inbox efficiently by highlighting what's important and suggesting relevant actions.",
+  "requestFramePermissions": []
+}
