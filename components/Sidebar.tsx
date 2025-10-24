@@ -1,15 +1,16 @@
 
 import React from 'react';
-import type { Category } from '../types';
-import { InboxIcon, TagIcon, PaperAirplaneIcon, NewspaperIcon, ExclamationTriangleIcon } from './Icons';
+import type { Category, JobCategory, AppMode } from '../types';
+import { InboxIcon, TagIcon, PaperAirplaneIcon, NewspaperIcon, ExclamationTriangleIcon, BriefcaseIcon, CheckCircleIcon, ChatBubbleLeftRightIcon, UserGroupIcon } from './Icons';
 
 interface SidebarProps {
-  categories: Category[];
-  selectedCategory: Category;
-  onSelectCategory: (category: Category) => void;
+  mode: AppMode;
+  categories: (Category | JobCategory)[];
+  selectedCategory: Category | JobCategory;
+  onSelectCategory: (category: Category | JobCategory) => void;
 }
 
-const categoryIcons: { [key in Category]?: React.ReactNode } = {
+const generalCategoryIcons: { [key in Category]?: React.ReactNode } = {
   'All': <InboxIcon className="w-5 h-5" />,
   'Work': <TagIcon className="w-5 h-5 text-blue-500" />,
   'Personal': <TagIcon className="w-5 h-5 text-green-500" />,
@@ -18,7 +19,18 @@ const categoryIcons: { [key in Category]?: React.ReactNode } = {
   'Urgent': <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />,
 };
 
-const Sidebar: React.FC<SidebarProps> = ({ categories, selectedCategory, onSelectCategory }) => {
+const jobCategoryIcons: { [key in JobCategory]?: React.ReactNode } = {
+    'All': <InboxIcon className="w-5 h-5" />,
+    'Job Alerts': <BriefcaseIcon className="w-5 h-5 text-blue-500" />,
+    'Application Responses': <CheckCircleIcon className="w-5 h-5 text-green-500" />,
+    'Networking': <UserGroupIcon className="w-5 h-5 text-purple-500" />,
+    'Recruiter Outreach': <ChatBubbleLeftRightIcon className="w-5 h-5 text-yellow-500" />,
+};
+
+
+const Sidebar: React.FC<SidebarProps> = ({ mode, categories, selectedCategory, onSelectCategory }) => {
+  const categoryIcons = mode === 'general' ? generalCategoryIcons : jobCategoryIcons;
+
   return (
     <aside className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 p-4 flex-shrink-0">
       <nav>
@@ -33,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({ categories, selectedCategory, onSelec
                     : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                 }`}
               >
-                {categoryIcons[category] || <TagIcon className="w-5 h-5" />}
+                {categoryIcons[category as keyof typeof categoryIcons] || <TagIcon className="w-5 h-5" />}
                 <span>{category}</span>
               </button>
             </li>

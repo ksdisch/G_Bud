@@ -17,6 +17,19 @@ const PriorityIndicator: React.FC<{ priority: 'High' | 'Medium' | 'Low' }> = ({ 
   return <span className={`w-2.5 h-2.5 rounded-full ${color} flex-shrink-0`} title={`Priority: ${priority}`}></span>;
 };
 
+const RelevanceScore: React.FC<{ score: number }> = ({ score }) => {
+    let color = 'bg-gray-400';
+    if (score > 75) color = 'bg-green-500';
+    else if (score > 50) color = 'bg-yellow-500';
+
+    return (
+        <div className="flex items-center gap-1.5">
+            <span className={`w-2.5 h-2.5 rounded-full ${color} flex-shrink-0`}></span>
+            <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{score}%</span>
+        </div>
+    )
+}
+
 const EmailListItem: React.FC<{ email: ProcessedEmail; isSelected: boolean; onSelect: () => void }> = ({ email, isSelected, onSelect }) => {
   return (
     <li
@@ -31,8 +44,12 @@ const EmailListItem: React.FC<{ email: ProcessedEmail; isSelected: boolean; onSe
           <p className="text-sm truncate font-medium text-gray-700 dark:text-gray-300">{email.subject}</p>
           <p className="text-xs truncate text-gray-500 dark:text-gray-400 mt-1">{email.processed.summary}</p>
         </div>
-        <div className="flex items-center gap-2 pl-2">
-            <PriorityIndicator priority={email.processed.priority} />
+        <div className="flex flex-col items-end gap-2 pl-2">
+            {email.processed.relevanceScore !== undefined && email.processed.relevanceScore !== null ? (
+                <RelevanceScore score={email.processed.relevanceScore} />
+            ) : (
+                <PriorityIndicator priority={email.processed.priority} />
+            )}
         </div>
       </div>
     </li>
@@ -40,6 +57,15 @@ const EmailListItem: React.FC<{ email: ProcessedEmail; isSelected: boolean; onSe
 };
 
 const EmailList: React.FC<EmailListProps> = ({ emails, selectedEmailId, onSelectEmail }) => {
+  if (emails.length === 0) {
+    return (
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden h-full flex flex-col items-center justify-center text-center p-4">
+        <h3 className="font-semibold text-gray-700 dark:text-gray-300">No Emails Found</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">There are no emails in this category.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden h-full flex flex-col">
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">

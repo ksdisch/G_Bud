@@ -1,7 +1,9 @@
 
-import type { RawEmail, Category } from './types';
+import type { RawEmail, Category, JobCategory } from './types';
 
-export const CATEGORIES: Category[] = ['All', 'Work', 'Personal', 'Promotions', 'Newsletters', 'Urgent'];
+export const GENERAL_CATEGORIES: Category[] = ['All', 'Work', 'Personal', 'Promotions', 'Newsletters', 'Urgent'];
+export const JOB_CATEGORIES: JobCategory[] = ['All', 'Job Alerts', 'Application Responses', 'Networking', 'Recruiter Outreach'];
+
 
 export const MOCK_EMAILS: RawEmail[] = [
   {
@@ -74,18 +76,80 @@ export const MOCK_EMAILS: RawEmail[] = [
     The Cloud Services Team`,
     timestamp: '2023-10-27T11:00:00Z',
   },
-    {
-    id: '6',
-    sender: 'HR Department <hr@corporate.com>',
-    subject: 'Open Enrollment for 2024 Benefits is Now Live',
-    body: `All employees,
+];
 
-    This is a reminder that the open enrollment period for your 2024 health benefits has begun. The deadline to make your selections is November 15th.
 
-    Please log into the employee portal to review your options and make your elections. There will be a webinar on Tuesday at 10 AM to answer any questions.
+export const MOCK_JOB_EMAILS: RawEmail[] = [
+  {
+    id: 'job-1',
+    sender: 'LinkedIn <jobs-noreply@linkedin.com>',
+    subject: 'New Job Alert: Senior Frontend Engineer at Innovate Inc.',
+    body: `Hi there,
 
-    Thank you,
-    Human Resources`,
-    timestamp: '2023-10-25T09:00:00Z',
+    A new job matching your profile has been posted:
+
+    Job Title: Senior Frontend Engineer
+    Company: Innovate Inc.
+    Location: San Francisco, CA (Remote available)
+    
+    Description:
+    Innovate Inc. is seeking a passionate Senior Frontend Engineer to build and scale our next-generation user interfaces. You will work with React, TypeScript, and GraphQL to create delightful user experiences.
+    
+    Requirements:
+    - 5+ years of experience in frontend development.
+    - Expertise in React and its ecosystem.
+    - Strong understanding of UI/UX principles.
+    - Experience with modern CI/CD pipelines.
+
+    Apply now on LinkedIn.`,
+    timestamp: '2023-10-28T08:00:00Z',
+  },
+  {
+    id: 'job-2',
+    sender: 'Sarah Chen, Recruiter <s.chen@techrecruit.io>',
+    subject: 'Exciting Opportunity at DataDriven Corp',
+    body: `Hello,
+
+    I came across your profile and was very impressed with your background in data visualization and full-stack development. 
+    
+    My client, DataDriven Corp, is looking for a Lead Software Engineer to join their team. The role focuses on building interactive dashboards and would be a great fit for your skills.
+
+    Would you be open to a brief chat next week to discuss this further?
+
+    Best regards,
+    Sarah Chen`,
+    timestamp: '2023-10-27T14:00:00Z',
+  },
+  {
+    id: 'job-3',
+    sender: 'Acme Corp Careers <careers@acme.com>',
+    subject: 'Interview Invitation for Software Engineer Role',
+    body: `Dear Applicant,
+
+    Thank you for your interest in the Software Engineer position at Acme Corp. We were impressed with your application and would like to invite you for an interview.
+    
+    The first round will be a 45-minute technical screen with our hiring manager, John Doe, via Google Meet.
+    
+    Please use the following link to book a time that works for you: [Calendar Link]
+    
+    We look forward to speaking with you.
+    
+    Sincerely,
+    The Acme Corp Hiring Team`,
+    timestamp: '2023-10-26T11:00:00Z',
+  },
+  {
+    id: 'job-4',
+    sender: 'Stark Industries <noreply@stark-careers.com>',
+    subject: 'Update on your application for UI/UX Designer',
+    body: `Hi,
+
+    Thank you for applying for the UI/UX Designer role at Stark Industries. We received a large number of qualified applicants, and after careful consideration, we have decided to move forward with other candidates whose experience more closely matches the requirements of this position.
+    
+    We appreciate you taking the time to interview with us and encourage you to apply for other roles in the future.
+    
+    Best,
+    Stark Industries`,
+    timestamp: '2023-10-25T16:30:00Z',
   },
 ];
