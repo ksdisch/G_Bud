@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Sidebar from './components/Sidebar';
 import EmailList from './components/EmailList';
 import EmailDetail from './components/EmailDetail';
+import GettingStartedGuide from './components/GettingStartedGuide';
 import { MOCK_EMAILS, MOCK_JOB_EMAILS, GENERAL_CATEGORIES, JOB_CATEGORIES } from './constants';
 import { processEmail } from './services/geminiService';
 import type { ProcessedEmail, Category, JobCategory, ProcessingStatus, AppMode } from './types';
-import { LoadingSpinnerIcon, MailIcon, BriefcaseIcon, UserCircleIcon, DocumentTextIcon, ComputerDesktopIcon, ClipboardDocumentListIcon } from './components/Icons';
+import { LoadingSpinnerIcon, MailIcon, BriefcaseIcon, UserCircleIcon, DocumentTextIcon, ComputerDesktopIcon, ClipboardDocumentListIcon, GoogleIcon, QuestionMarkCircleIcon, CheckBadgeIcon } from './components/Icons';
 
 const JobSearchSetup: React.FC<{ onResumeLoaded: (resumeText: string) => void }> = ({ onResumeLoaded }) => {
   const [activeMethod, setActiveMethod] = useState<'drive' | 'upload' | 'paste'>('drive');
@@ -108,7 +108,7 @@ B.S. in Computer Science | 2012 - 2016
   );
 
   const TABS = [
-    { id: 'drive', label: 'Google Drive', icon: <svg className="w-5 h-5" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M34.2 6H13.8L6 19.35V36.6H20.4L27.6 23.25H42L34.2 6Z" fill="#2196F3"></path><path d="M20.4 36.6L27.6 48L42 23.25H27.6L20.4 36.6Z" fill="#4CAF50"></path><path d="M11.55 36.6L6 27L13.8 6L18.9 14.7L11.55 36.6Z" fill="#FFC107"></path></svg> },
+    { id: 'drive', label: 'Google Drive', icon: <GoogleIcon className="w-5 h-5" /> },
     { id: 'upload', label: 'Upload File', icon: <ComputerDesktopIcon className="w-5 h-5" /> },
     { id: 'paste', label: 'Paste Text', icon: <ClipboardDocumentListIcon className="w-5 h-5" /> }
   ];
@@ -151,7 +151,7 @@ B.S. in Computer Science | 2012 - 2016
                   onClick={() => setIsPickerOpen(true)}
                   className="inline-flex items-center gap-3 px-6 py-3 bg-white text-gray-700 font-semibold rounded-lg shadow-md hover:bg-gray-100 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900"
                 >
-                  <svg className="w-6 h-6" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M34.2 6H13.8L6 19.35V36.6H20.4L27.6 23.25H42L34.2 6Z" fill="#2196F3"></path><path d="M20.4 36.6L27.6 48L42 23.25H27.6L20.4 36.6Z" fill="#4CAF50"></path><path d="M11.55 36.6L6 27L13.8 6L18.9 14.7L11.55 36.6Z" fill="#FFC107"></path></svg>
+                  <GoogleIcon className="w-6 h-6" />
                   Connect Google Drive
                 </button>
                 <p className="text-xs text-gray-500 mt-3">(Simulated)</p>
@@ -209,6 +209,8 @@ const App: React.FC = () => {
   const [processedEmails, setProcessedEmails] = useState<ProcessedEmail[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<Category | JobCategory>('All');
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
+  const [isHelpOpen, setIsHelpOpen] = useState(true); // Open on first load
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   
   const processAllEmails = useCallback(async () => {
     if (mode === 'jobSearch' && !resume) {
@@ -322,9 +324,20 @@ const App: React.FC = () => {
             {mode === 'general' ? <UserCircleIcon className="w-8 h-8"/> : <BriefcaseIcon className="w-8 h-8"/>}
             AI Email Assistant
         </h1>
-        <div className="flex items-center gap-2 p-1 rounded-full bg-gray-200 dark:bg-gray-800">
-            <button onClick={() => setMode('general')} className={`px-3 py-1 text-sm font-semibold rounded-full transition-colors ${mode === 'general' ? 'bg-white text-gray-800 shadow-sm dark:bg-gray-700 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>General</button>
-            <button onClick={() => setMode('jobSearch')} className={`px-3 py-1 text-sm font-semibold rounded-full transition-colors ${mode === 'jobSearch' ? 'bg-white text-gray-800 shadow-sm dark:bg-gray-700 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>Job Search</button>
+        <div className="flex items-center gap-4">
+            {isGoogleConnected && (
+                <div className="hidden sm:flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/50 px-3 py-1.5 rounded-full">
+                    <CheckBadgeIcon className="w-5 h-5" />
+                    <span>Account Connected</span>
+                </div>
+            )}
+            <div className="flex items-center gap-2 p-1 rounded-full bg-gray-200 dark:bg-gray-800">
+                <button onClick={() => setMode('general')} className={`px-3 py-1 text-sm font-semibold rounded-full transition-colors ${mode === 'general' ? 'bg-white text-gray-800 shadow-sm dark:bg-gray-700 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>General</button>
+                <button onClick={() => setMode('jobSearch')} className={`px-3 py-1 text-sm font-semibold rounded-full transition-colors ${mode === 'jobSearch' ? 'bg-white text-gray-800 shadow-sm dark:bg-gray-700 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>Job Search</button>
+            </div>
+            <button onClick={() => setIsHelpOpen(true)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white" title="Getting Started Guide">
+                <QuestionMarkCircleIcon className="w-7 h-7" />
+            </button>
         </div>
       </header>
       <div className="flex flex-grow overflow-hidden">
@@ -338,6 +351,13 @@ const App: React.FC = () => {
           {renderContent()}
         </main>
       </div>
+      {isHelpOpen && (
+        <GettingStartedGuide 
+            onClose={() => setIsHelpOpen(false)}
+            isGoogleConnected={isGoogleConnected}
+            setIsGoogleConnected={setIsGoogleConnected}
+        />
+      )}
     </div>
   );
 };
